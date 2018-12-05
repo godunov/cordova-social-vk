@@ -43,11 +43,17 @@ import com.vk.sdk.dialogs.VKShareDialog;
 import com.vk.sdk.api.photo.VKUploadImage;
 import com.vk.sdk.api.photo.VKImageParameters;
 import com.vk.sdk.util.VKJsonHelper;
+import com.vk.sdk.util.VKUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class SocialVk extends CordovaPlugin {
     private static final String TAG = "SocialVk";
     private static final String ACTION_INIT = "initSocialVk";
     private static final String ACTION_LOGIN = "login";
+    private static final String ACTION_GET_FINGERPRINT = "getFingerPrintVkSdk";
     private static final String ACTION_LOGOUT = "logout";
     private static final String ACTION_SHARE = "share";
     private static final String ACTION_USERS_GET = "users_get";
@@ -66,6 +72,7 @@ public class SocialVk extends CordovaPlugin {
     private static final String ACTION_FRIENDS_GET_RECENT = "friends_getRecent";
     private static final String ACTION_FRIENDS_GET_REQUESTS = "friends_getRequests";
     private static final String ACTION_CALL_API_METHOD = "callApiMethod";
+    private static final String ACTION_LOGGED = "isLogged";
     private CallbackContext _callbackContext;
 
     private String savedUrl = null;
@@ -116,6 +123,8 @@ public class SocialVk extends CordovaPlugin {
             return true;
         } else if (ACTION_SHARE.equals(action)) {
             return shareOrLogin(args.getString(0), args.getString(1), args.getString(2));
+        } else if (ACTION_GET_FINGERPRINT.equals(action)) {
+            return getFingerprint(callbackContext);
         } else if (ACTION_USERS_GET.equals(action)) {
             HashMap<String, Object> params = new HashMap<String, Object>();
             params.put("user_ids", args.getString(0));
@@ -226,6 +235,8 @@ public class SocialVk extends CordovaPlugin {
             int sort = args.getInt(5);
             int suggested = args.getInt(6);
             return friends_getRequests(offset, count, extended, needs_mutual, out, sort, suggested, callbackContext);
+        } else if (ACTION_LOGGED.equals(action)) {
+            return isLogged(callbackContext);
         } else if (ACTION_CALL_API_METHOD.equals(action)) {
             String method = args.getString(0);
             JSONObject params = args.getJSONObject(1);
@@ -254,7 +265,23 @@ public class SocialVk extends CordovaPlugin {
         VKSdk.login(getActivity(), permissions);
         return true;
     }
-
+    
+    private boolean isLogged(final CallbackContext callbackContext) {
+        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, VKAccessToken.currentToken().accessToken));
+        return true;
+    }
+    
+    private boolean getFingerprint(final CallbackContext callbackContext) {
+        Activity activity = getActivity();
+        String[] fingerprints = VKUtil.getCertificateFingerprint(activity, activity.getPackageName());
+        JSONArray resultArray = stringArrayToJsonArray(fingerprints);
+        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, resultArray));
+        return true;
+    }
+    public static JSONArray stringArrayToJsonArray(String [] stringArray) {
+        return new JSONArray(Arrays.asList(stringArray));
+    }
+    
     private boolean shareOrLogin(final String url, final String comment, final String imageUrl)
     {
         this.cordova.setActivityResultCallback(this);

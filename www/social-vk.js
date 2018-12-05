@@ -9,12 +9,19 @@ SocialVk.prototype.login = function(permissions, successCallback, errorCallback)
     cordova.exec(successCallback, errorCallback, "SocialVk", "login", [permissions]);
 };
 
+SocialVk.prototype.getFingerPrintVkSdk = function(successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, "SocialVk", "getFingerPrintVkSdk", []);
+};
+
 SocialVk.prototype.share = function(sourceURL, description, imageURL, successCallback, errorCallback) {
     cordova.exec(successCallback, errorCallback, "SocialVk", "share", [sourceURL, description, imageURL]);
 };
 
 SocialVk.prototype.logout = function(successCallback, errorCallback) {
     cordova.exec(successCallback, errorCallback, "SocialVk", "logout", []);
+};
+SocialVk.prototype.isLogged = function(successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, "SocialVk", "isLogged", []);
 };
 
 // API methods
